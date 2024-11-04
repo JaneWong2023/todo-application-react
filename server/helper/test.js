@@ -1,9 +1,12 @@
 import fs from'fs';
 import path from 'path';
 import { pool } from './db.js';
-// import { hash } from 'bcrypt';
-// import jwt from 'jsonwebtoken';
-// const { sign } = jwt; 
+import { hash } from 'bcrypt';
+import jwt from 'jsonwebtoken';
+const { sign } = jwt; 
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 
 const __dirname = import.meta.dirname
@@ -13,16 +16,40 @@ const initializeTestDb = async()=>{
     pool.query(sql);
 }
 
-// const insertTestUser = (email,password)=>{
-//     hash(password,10,(error,hashedPassword)=>{
-//         pool.query('insert into account (email,password) values ($1,$2)',
-//             [email,hashedPassword])
-//     })
-// }
+const insertTestUser = (email,password)=>{
+    hash(password,10,(error,hashedPassword)=>{
+        pool.query('insert into account (email,password) values ($1,$2)',
+            [email,hashedPassword])
+    })
+}
+// const insertTestUser = async (email, password) => {
+//     // 使用 Promise 包裹 hash
+//     const hashedPassword = await new Promise((resolve, reject) => {
+//         hash(password, 10, (error, hashed) => {
+//             if (error) {
+//                 return reject(error); // 处理哈希错误
+//             }
+//             resolve(hashed); // 返回哈希密码
+//         });
+//     });
 
-// const getToken = (email) => {
-//     return sign({user:email},process.env.JWT_SECRET_KEY)
-// }
+//     // 使用 Promise 包裹 pool.query
+//     await new Promise((resolve, reject) => {
+//         pool.query(
+//             'insert into account (email, password) values ($1, $2)',
+//             [email, hashedPassword],
+//             (error) => {
+//                 if (error) {
+//                     return reject(error); // 处理查询错误
+//                 }
+//                 resolve(); // 插入成功
+//             }
+//         );
+//     });
+// };
 
-// export {initializeTestDb,insertTestUser,getToken};
-export {initializeTestDb};
+const getToken = (email) => {
+    return sign({user:email},process.env.JWT_SECRET_KEY)
+}
+
+export {initializeTestDb,insertTestUser,getToken};

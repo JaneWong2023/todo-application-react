@@ -1,13 +1,12 @@
-// import { initializeTestDb, insertTestUser,getToken } from "./helper/test.js";
-import { initializeTestDb } from "./helper/test.js";
-
+import { initializeTestDb, insertTestUser,getToken } from "./helper/test.js";
+// import { pool } from "./helper/db.js";
 // const base_url = 'http://localhost:3001';
 
 import { expect } from "chai";
 
 describe('GET Tasks', () => {
-    before(async () => {
-        await initializeTestDb();
+    before(() => {
+        initializeTestDb();
     });
     it('should get all tasks', async () => {
         const response = await fetch('http://localhost:3001/');
@@ -20,16 +19,16 @@ describe('GET Tasks', () => {
 })
 
 describe('POST Task', () => {
-    // const email = 'post@foo.com'
-    // const password = 'post123'
-    // insertTestUser(email,password)
-    // const token = getToken(email)
+    const email = 'post@foo.com'
+    const password = 'post123'
+    insertTestUser(email,password)
+    const token = getToken(email)
     it('should create a new task', async () => {
         const response = await fetch('http://localhost:3001'+ '/create', {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json',
-                // Authorization: token
+                Authorization: token
             },
             body: JSON.stringify({description: 'Task from unit test'})
         })
@@ -43,7 +42,8 @@ describe('POST Task', () => {
         const response = await fetch('http://localhost:3001'+ '/create', {
             method: 'post',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                Authorization: token
             },
             body: JSON.stringify({'description': null})
         });
@@ -55,10 +55,16 @@ describe('POST Task', () => {
 })
 
 describe('DELETE Task', () => {
+    const email = 'delete@foo.com'
+    const password = 'delete123'
+    insertTestUser(email,password)
+    const token = getToken(email)
     it('should delete a task', async () => {
         const response = await fetch('http://localhost:3001' + '/delete/1', {
             method: 'delete',
-            // Authorization: token
+            headers: {
+                Authorization: token
+            },
         });
         const data = await response.json();
         expect(response.status).to.equal(200);
@@ -68,7 +74,10 @@ describe('DELETE Task', () => {
 
     it('should not delete a task with SQL injection',async () => {
         const response = await fetch('http://localhost:3001' + '/delete/id=0 or id >0', {
-            method: 'delete'
+            method: 'delete',
+            headers: {
+                Authorization: token
+            },
         })
         const data = await response.json();
         expect(response.status).to.equal(500);
@@ -78,13 +87,14 @@ describe('DELETE Task', () => {
 })
 
 describe('POST register',() =>{
-    const email =`register_${Date.now()}@foo.com` ;
+    // const email ='`register${Date.now()}@foo.com`' ;
+    const email = 'register@foo.com'
     const password = 'register123'
     it('should register with vaild email and password',async() =>{
-        const response = await fetch('http://localhost:3001'+'/user/register',{
+        const response = await fetch('http://localhost:3001/user/register',{
         method: 'post',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
         body:JSON.stringify({'email':email,'password':password})
     })
@@ -95,21 +105,29 @@ describe('POST register',() =>{
 })
 })
 
-// describe('POST login',()=>{
-//     const email = `login@foo.com`;
-//     const password = 'login123';
-//     insertTestUser(email,password);
-//     it('should login with valid credentials',async()=>{
-//         const response = await fetch('http://localhost:3001'+'/user/login',{
-//             method:'post',
-//             headers:{
-//                 'Content-Type':'application/json'
-//             },
-//             body:JSON.stringify({'email':email,'password':password})
-//         })
-//         const data = await response.json();
-//         expect(response.status).to.equal(200,data.error)
-//         expect(data).to.be.an('object')
-//         expect(data).to.include.all.keys('id','email','token')
-//     })
-// })
+describe('POST login',()=>{
+    const email = `login@foo.com`;
+    const password = 'login123';
+
+    // before(async () => {
+    //     await insertTestUser(email, password);
+    //     const result = await pool.query('select * from account where email=$1', [email]);
+    //     console.log(result.rows); // 输出查询结果，确保用户已插入
+    // });
+    insertTestUser(email, password);
+
+
+    it('should login with valid credentials',async()=>{
+        const response = await fetch('http://localhost:3001/user/login',{
+            method:'post',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({'email':email,'password':password})
+        })
+        const data = await response.json();
+        expect(response.status).to.equal(200,data.error)
+        expect(data).to.be.an('object')
+        expect(data).to.include.all.keys('id','email','token')
+    })
+})
