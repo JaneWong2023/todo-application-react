@@ -21,7 +21,7 @@ function Home() {
   },[])
 
   const addTask = () => {
-    const headers = {headers:{'Authorization': user.token}}
+    const headers = {headers:{Authorization: user.token}}
 
     axios.post(url + '/create', {description: task}, headers)
     .then(response =>{
@@ -33,7 +33,7 @@ function Home() {
   }
  
   const deleteTask = (id) => {
-    const headers = {headers:{'Authorization': user.token}}
+    const headers = {headers:{Authorization: user.token}}
 
     axios.delete(url + '/delete/' + id,headers)
     .then(response =>{
