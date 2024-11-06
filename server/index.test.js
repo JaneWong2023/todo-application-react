@@ -1,5 +1,4 @@
 import { initializeTestDb, insertTestUser,getToken } from "./helper/test.js";
-// import { pool } from "./helper/db.js";
 // const base_url = 'http://localhost:3001';
 
 import { expect } from "chai";
@@ -109,11 +108,6 @@ describe('POST login',()=>{
     const email = `login@foo.com`;
     const password = 'login123';
 
-    // before(async () => {
-    //     await insertTestUser(email, password);
-    //     const result = await pool.query('select * from account where email=$1', [email]);
-    //     console.log(result.rows); // 输出查询结果，确保用户已插入
-    // });
     insertTestUser(email, password);
 
 
