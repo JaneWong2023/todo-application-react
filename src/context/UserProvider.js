@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { UserContext } from './UserContext';
 import axios from 'axios';
+import React from 'react';
 
 const url = process.env.REACT_APP_API_URL;
 
@@ -24,8 +25,9 @@ export default function UserProvider({ children }) {
         const headers = {headers:{'Content-Type':'application/json'}}
         try{
             const response = await axios.post(url + '/user/login',json,headers)
-            const token = response.data.token
-            setUser(response.data)
+            const { id, email, token } = response.data;
+            const userData = { id, email, token };
+            setUser(userData);
             sessionStorage.setItem('user',JSON.stringify(response.data))
         }catch(error){
             setUser({email:'',password:''})

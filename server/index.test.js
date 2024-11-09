@@ -1,5 +1,6 @@
-import { initializeTestDb, insertTestUser,getToken } from "./helper/test.js";
-// const base_url = 'http://localhost:3001';
+import { initializeTestDb, insertTestUser,getToken } from "./helpers/test.js";
+
+const base_url = 'http://localhost:3001';
 
 import { expect } from "chai";
 
@@ -8,7 +9,7 @@ describe('GET Tasks', () => {
         initializeTestDb();
     });
     it('should get all tasks', async () => {
-        const response = await fetch('http://localhost:3001/');
+        const response = await fetch(base_url);
         const data = await response.json();
     
         expect(response.status).to.equal(200);
@@ -23,7 +24,7 @@ describe('POST Task', () => {
     insertTestUser(email,password)
     const token = getToken(email)
     it('should create a new task', async () => {
-        const response = await fetch('http://localhost:3001'+ '/create', {
+        const response = await fetch(base_url+ '/create', {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,7 +39,7 @@ describe('POST Task', () => {
     });
 
     it('should not post a new task without description', async () => {
-        const response = await fetch('http://localhost:3001'+ '/create', {
+        const response = await fetch(base_url+ '/create', {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json',
@@ -47,7 +48,24 @@ describe('POST Task', () => {
             body: JSON.stringify({'description': null})
         });
         const data = await response.json();
-        expect(response.status).to.equal(500);
+        expect(response.status).to.equal(400,data.error);
+        expect(data).to.be.an('object');
+        expect(data).to.include.all.keys('error');
+    });
+
+    it("should not create a new task with zero length description", async () => {
+        const token = await getToken(email);
+        const response = await fetch(base_url + '/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token 
+            },
+            body: JSON.stringify({ description: null })
+        });
+        const data = await response.json();
+
+        expect(response.status).to.equal(400, data.error);
         expect(data).to.be.an('object');
         expect(data).to.include.all.keys('error');
     });
@@ -59,7 +77,7 @@ describe('DELETE Task', () => {
     insertTestUser(email,password)
     const token = getToken(email)
     it('should delete a task', async () => {
-        const response = await fetch('http://localhost:3001' + '/delete/1', {
+        const response = await fetch(base_url + '/delete/1', {
             method: 'delete',
             headers: {
                 Authorization: token
@@ -72,7 +90,7 @@ describe('DELETE Task', () => {
     })
 
     it('should not delete a task with SQL injection',async () => {
-        const response = await fetch('http://localhost:3001' + '/delete/id=0 or id >0', {
+        const response = await fetch(base_url + '/delete/id=0 or id >0', {
             method: 'delete',
             headers: {
                 Authorization: token
@@ -86,11 +104,10 @@ describe('DELETE Task', () => {
 })
 
 describe('POST register',() =>{
-    // const email ='`register${Date.now()}@foo.com`' ;
     const email = 'register@foo.com'
     const password = 'register123'
     it('should register with vaild email and password',async() =>{
-        const response = await fetch('http://localhost:3001/user/register',{
+        const response = await fetch(base_url+'/user/register',{
         method: 'post',
         headers: {
             'Content-Type': 'application/json',
@@ -110,9 +127,8 @@ describe('POST login',()=>{
 
     insertTestUser(email, password);
 
-
     it('should login with valid credentials',async()=>{
-        const response = await fetch('http://localhost:3001/user/login',{
+        const response = await fetch(base_url+'/user/login',{
             method:'post',
             headers:{
                 'Content-Type':'application/json'
