@@ -34,16 +34,17 @@ function Home() {
   }
  
   const deleteTask = (id) => {
-    const headers = {headers:{Authorization: user.token}}
-
-    axios.delete(url + '/delete/' + id,headers)
-    .then(response =>{
-    const withoutRemoved = tasks.filter((item) => item !== id)
-    setTasks(withoutRemoved)
-  }).catch(error =>{  
-    alert(error.response.data.error ? error.response.data.error : error)
-  })
-}
+    const headers = { headers: { Authorization: user.token } };
+  
+    axios.delete(url + '/delete/' + id, headers)
+    .then((response) => {
+      const withoutRemoved = tasks.filter((task) => task.id !== id);
+      setTasks(withoutRemoved); 
+    })
+    .catch((error) => {
+      alert(error.response?.data?.error ? error.response.data.error : error);
+    });
+  };
 
 
   return (
